@@ -1,0 +1,23 @@
+sort
+    Gate = struct up | down;
+    Train = struct far | near | inside;
+
+act
+    approach, enter, leave,
+    lower, raise, grant,
+    open, close;
+
+proc
+    GATE(g: Gate) =
+        (g==up)   -> open . lower . GATE(down) +
+        (g==down) -> close . raise . GATE(up);
+
+    TRAIN(t: Train) =
+        (t==far)    -> approach . TRAIN(near) +
+        (t==near)   -> grant . enter . TRAIN(inside) +  
+        (t==inside) -> leave . TRAIN(far);
+
+    CONTROLLER = approach . open . lower . grant . enter . leave . close . raise . CONTROLLER;
+
+init
+    GATE(up) || TRAIN(far) || CONTROLLER;
