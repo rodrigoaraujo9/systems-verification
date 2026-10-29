@@ -3,21 +3,36 @@ sort
     Train = struct far | near | inside;
 
 act
-    approach, enter, leave,
-    lower, raise, grant,
-    open, close;
+    approach, enter, leave, raise,
+    down, up,
+    lower_comm, grant_comm,
+	lower_gate, lower_controller,
+	grant_train, grant_controller;
 
 proc
-    GATE(g: Gate) =
-        (g==up)   -> open . lower . GATE(down) +
-        (g==down) -> close . raise . GATE(up);
-
-    TRAIN(t: Train) =
+	TRAIN(t: Train) =
         (t==far)    -> approach . TRAIN(near) +
-        (t==near)   -> grant . enter . TRAIN(inside) +  
+        (t==near)   -> grant_train . enter . TRAIN(inside) +
         (t==inside) -> leave . TRAIN(far);
 
-    CONTROLLER = approach . open . lower . grant . enter . leave . close . raise . CONTROLLER;
+    GATE(g: Gate) =
+        (g==up)   -> lower_gate . down . GATE(down) +
+        (g==down) -> raise . up . GATE(up);
+
+    CONTROLLER = approach
+			   . lower_controller
+			   . grant_controller
+			   . enter
+			   . leave
+			   . raise
+			   . CONTROLLER;
 
 init
-    GATE(up) || TRAIN(far) || CONTROLLER;
+    hide( { grant_comm, lower_comm }
+        , block( { lower_controller
+                 , lower_gate
+                 , grant_train
+                 , grant_controller }
+               , comm( { lower_controller | lower_gate  ->  lower_comm
+                       , grant_train | grant_controller ->  grant_comm }
+                     , GATE(up) || TRAIN(far) || CONTROLLER)));
