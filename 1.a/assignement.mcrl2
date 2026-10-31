@@ -1,38 +1,55 @@
 sort
-    Gate = struct up | down;
-    Train = struct far | near | inside;
+  Gate = struct open | closed;
 
 act
-    approach, enter, leave, raise,
-    down, up,
-    lower_comm, grant_comm,
-	lower_gate, lower_controller,
-	grant_train, grant_controller;
+  	% Train Actions
+   	approach_train, grant_train, leave_train;
+
+    % Controller Actions
+  	approach_controller, lower_controller, down_controller,
+  	grant_controller, leave_controller, raise_controller, up_controller;
+
+	% Gate Actions
+  	lower_gate, down_gate, raise_gate, up_gate;
+
+    % Communication Actions
+  	approach_comm, lower_comm, down_comm, grant_comm,
+  	leave_comm, raise_comm, up_comm;
+
+    % Controller Actions
+  	enter, exit;
 
 proc
-	TRAIN(t: Train) =
-        (t==far)    -> approach . TRAIN(near) +
-        (t==near)   -> grant_train . enter . TRAIN(inside) +
-        (t==inside) -> leave . TRAIN(far);
+  TRAIN = approach_train . grant_train . enter . exit . leave_train . TRAIN;
 
-    GATE(g: Gate) =
-        (g==up)   -> lower_gate . down . GATE(down) +
-        (g==down) -> raise . up . GATE(up);
+  GATE(g: Gate) =
+      (g == open)   -> lower_gate . down_gate . GATE(closed)
+    + (g == closed) -> raise_gate . up_gate   . GATE(open);
 
-    CONTROLLER = approach
-			   . lower_controller
-			   . grant_controller
-			   . enter
-			   . leave
-			   . raise
-			   . CONTROLLER;
+  CONTROLLER =
+      approach_controller
+    . lower_controller . down_controller
+    . grant_controller
+    . leave_controller
+    . raise_controller . up_controller
+    . CONTROLLER;
 
 init
-    hide( { grant_comm, lower_comm }
-        , block( { lower_controller
-                 , lower_gate
-                 , grant_train
-                 , grant_controller }
-               , comm( { lower_controller | lower_gate  ->  lower_comm
-                       , grant_train | grant_controller ->  grant_comm }
-                     , GATE(up) || TRAIN(far) || CONTROLLER)));
+  hide( { lower_comm
+	    , down_comm
+	    , grant_comm
+	    , raise_comm
+        , up_comm
+		, approach_comm
+		, leave_comm }
+	  , block( { lower_controller
+			   , lower_gate
+			   , grant_controller
+			   , grant_train }, comm( { approach_train   | approach_controller -> approach_comm
+                     				  , lower_controller | lower_gate          -> lower_comm
+                     				  , down_controller  | down_gate           -> down_comm
+                     				  , grant_train      | grant_controller    -> grant_comm
+                     				  , leave_train      | leave_controller    -> leave_comm
+                     				  , raise_controller | raise_gate          -> raise_comm
+                     				  , up_controller    | up_gate             -> up_comm }
+                   					, TRAIN || GATE(open) || CONTROLLER )));
