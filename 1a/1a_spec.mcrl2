@@ -1,42 +1,79 @@
 act
-  	% Train Actions
-   	approach_train, grant_train, leave_train;
+
+    % Train Actions
+    approach_train, grant_train, leave_train;
 
     % Controller Actions
-  	approach_controller, lower_controller, down_controller,
-  	grant_controller, leave_controller, raise_controller, up_controller;
+    approach_controller, lower_controller, down_controller,
+    grant_controller, leave_controller, raise_controller, up_controller;
 
-	% Gate Actions
-  	lower_gate, down_gate, raise_gate, up_gate;
+    % Gate Actions
+    lower_gate, down_gate, raise_gate, up_gate;
 
     % Communication Actions
-  	approach, lower, down, grant,
-  	leave, raise, up;
+    approach, lower, down, grant,
+    leave, raise, up;
 
-    % Controller Actions
-  	enter, exit;
+    % Train Actions
+    enter, exit;
+
 
 proc
-  TRAIN = approach_train . grant_train . enter . exit . leave_train . TRAIN;
 
-  GATE = lower_gate . down_gate . raise_gate . up_gate . GATE;
+    TRAIN =
+        approach_train
+      . grant_train
+      . enter
+      . exit
+      . leave_train
+      . TRAIN;
 
-  CONTROLLER =
-      approach_controller
-    . lower_controller . down_controller
-    . grant_controller
-    . leave_controller
-    . raise_controller . up_controller
-    . CONTROLLER;
+    GATE =
+        lower_gate
+      . down_gate
+      . raise_gate
+      . up_gate
+      . GATE;
+
+    CONTROLLER =
+        approach_controller
+      . lower_controller
+      . down_controller
+      . grant_controller
+      . leave_controller
+      . raise_controller
+      . up_controller
+      . CONTROLLER;
+
 
 init
-    hide({ approach, lower, down, grant, leave, raise, up },
-    allow({ approach, lower, down, grant, leave, raise, up, enter, exit},
-    comm( { approach_controller | approach_train -> approach
-    	  , lower_controller    | lower_gate     -> lower
-    	  , down_controller     | down_gate      -> down
-    	  , grant_controller    | grant_train    -> grant
-    	  , leave_controller    | leave_train    -> leave
-    	  , raise_controller    | raise_gate     -> raise
-    	  , up_controller       | up_gate        -> up }
-          , TRAIN || GATE || CONTROLLER )));
+
+    hide(
+      {approach, lower, down, grant, leave, raise, up},
+      allow(
+        {
+          approach,
+          lower_controller, lower_gate,
+          down,
+          leave,
+          raise,
+          up,
+          grant_controller, grant_train,
+          enter,
+          exit
+        },
+        comm(
+          {
+            approach_controller | approach_train -> approach,
+            lower_controller    | lower_gate      -> lower,
+            down_controller     | down_gate       -> down,
+            grant_controller    | grant_train     -> grant,
+            leave_controller    | leave_train     -> leave,
+            raise_controller    | raise_gate      -> raise,
+            up_controller       | up_gate         -> up
+          },
+
+          TRAIN || GATE || CONTROLLER
+        )
+      )
+    );
