@@ -49,19 +49,18 @@ proc
 init
 
     hide(
-      {approach, lower, down, grant, leave, raise, up},
-      allow(
-        {
-          approach,
-          lower_controller, lower_gate,
-          down,
-          leave,
-          raise,
-          up,
-          grant_controller, grant_train,
-          enter,
-          exit
-        },
+      {lower, down, grant, leave, raise, up},
+      allow({
+    	approach,
+   	 	lower,
+    	down_controller, down_gate,
+		leave_controller, leave_train,
+    	raise_controller, raise_gate,
+    	up_controller, up_gate,
+    	grant,
+    	enter,
+    	exit
+	 },
         comm(
           {
             approach_controller | approach_train -> approach,
