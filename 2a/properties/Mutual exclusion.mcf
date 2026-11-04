@@ -1,0 +1,6 @@
+([true* . enter(t1) . (!exit(t1))* . enter(t2)] false)
+	&& ([true* . enter(t1) . (!exit(t1))* . enter(t3)] false)
+	&& ([true* . enter(t2) . (!exit(t2))* . enter(t3)] false)
+    && ([true* . enter(t2) . (!exit(t2))* . enter(t1)] false)
+	&& ([true* . enter(t3) . (!exit(t3))* . enter(t1)] false)
+    && ([true* . enter(t3) . (!exit(t3))* . enter(t2)] false)

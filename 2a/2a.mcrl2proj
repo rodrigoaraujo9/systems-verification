@@ -1,6 +1,11 @@
 <root>
  <spec>2a_spec.mcrl2</spec>
- <properties/>
+ <properties>
+  <property>Safety</property>
+  <property>Mutual exclusion</property>
+  <property>No premature raising</property>
+  <property>Deadlock freedom</property>
+ </properties>
  <jittyc>false</jittyc>
  <linearisation_method>regular</linearisation_method>
  <enumeration_limit>0</enumeration_limit>
