@@ -1,6 +1,11 @@
 <root>
  <spec>1a_spec.mcrl2</spec>
- <properties/>
+ <properties>
+  <property>Safety</property>
+  <property>Reachability</property>
+  <property>Liveness</property>
+  <property>Deadlock freedom</property>
+ </properties>
  <jittyc>false</jittyc>
  <linearisation_method>regular</linearisation_method>
  <enumeration_limit>0</enumeration_limit>
