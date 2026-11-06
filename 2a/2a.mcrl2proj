@@ -8,6 +8,7 @@
   <property>Liveness per train</property>
   <property>Road Avaliability</property>
   <property>Non vacuity</property>
+  <property>Road avaliability infinite opening</property>
  </properties>
  <jittyc>false</jittyc>
  <linearisation_method>regular</linearisation_method>

@@ -1,50 +1,66 @@
 sort
     Id = struct t1 | t2 | t3;
-    Gate = struct open | closed;
+    Gate = struct open | opening | closed | closing;
     Crossing = struct busy | free;
 
 act
     % Train Actions
-    approach_train, grant_train, leave_train,
-    enter, exit : Id;
+    approach_train, exit_train,
+    grant_train, leave_train,
+    enter : Id;
 
     % Controller Actions
     lower_controller, down_controller, raise_controller, up_controller;
-    approach_controller, grant_controller, leave_controller : Id;
+    approach_controller, grant_controller, leave_controller, exit_controller : Id;
 
     % Gate Actions
     lower_gate, down_gate, raise_gate, up_gate;
 
     % Communication Actions
-    approach, grant, leave : Id;
+    approach, grant, exit, leave : Id;
     lower, down, raise, up;
 
 proc
     TRAIN(t: Id) = approach_train(t)
                  . grant_train(t)
                  . enter(t)
-                 . exit(t)
+                 . exit_train(t)
                  . leave_train(t)
                  . TRAIN(t);
 
-    GATE = lower_gate . down_gate . raise_gate . up_gate . GATE;
+    GATE = lower_gate . down_gate . raise_gate . GATE_OPENING;
+
+    GATE_OPENING = up_gate . GATE +
+                    lower_gate . down_gate . raise_gate . GATE_OPENING;
 
     CONTROLLER(trains: FSet(Id), crossing: Crossing, gate: Gate) =
 
         (sum t: Id . !(t in trains) ->
             approach_controller(t) . CONTROLLER(trains + {t}, crossing, gate)) +
 
-        ((gate == open && trains != {}) ->
-            lower_controller . down_controller . CONTROLLER(trains, crossing, closed)) +
-
         (sum t: Id . (t in trains && gate == closed && crossing == free) ->
             grant_controller(t) . CONTROLLER(trains, busy, gate)) +
 
         (sum t: Id . (t in trains && crossing == busy) ->
-            leave_controller(t) . CONTROLLER(trains - {t}, free, gate)) +
+            exit_controller(t) . CONTROLLER(trains - {t}, crossing, gate)) +
 
-        ((gate == closed && trains == {}) ->
-            raise_controller . up_controller . CONTROLLER(trains, crossing, open));
+        (sum t: Id . (!(t in trains) && crossing == busy) ->
+            leave_controller(t) . CONTROLLER(trains, free, gate)) +
+
+        ((gate == open && trains != {}) ->
+            lower_controller . CONTROLLER(trains, crossing, closing)) +
+
+        ((gate == closing) ->
+            down_controller . CONTROLLER(trains, crossing, closed)) +
+
+        ((gate == closed && trains == {} && crossing == free) ->
+            raise_controller . CONTROLLER(trains, crossing, opening)) +
+
+		((gate == opening && trains == {}) ->
+   			up_controller . CONTROLLER(trains, crossing, open)) +
+
+		((gate == opening && trains != {}) ->
+    		lower_controller . CONTROLLER(trains, crossing, closing));
 
 init
     allow({ approach, lower, down, grant, leave, raise, up, enter, exit },
@@ -52,6 +68,7 @@ init
               , lower_controller    | lower_gate     -> lower
               , down_controller     | down_gate      -> down
               , grant_controller    | grant_train    -> grant
+              , exit_controller     | exit_train     -> exit
               , leave_controller    | leave_train    -> leave
               , raise_controller    | raise_gate     -> raise
               , up_controller       | up_gate        -> up }

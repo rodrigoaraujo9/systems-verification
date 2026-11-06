@@ -1,1 +1,2 @@
-forall t: Id . [true* . approach(t)][!enter(t)*]<true*>true
+forall t: Id .  [true* . approach(t)] 
+    mu X . (<true> true && [!enter(t)] X) 

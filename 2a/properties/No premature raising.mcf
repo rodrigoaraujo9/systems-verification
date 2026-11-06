@@ -1,1 +1,1 @@
-forall t: Id . ([true* . approach(t) . (!exit(t))* . up] false) 
+forall t: Id . ([true* . approach(t) . (!leave(t))* . up] false) 
