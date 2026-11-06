@@ -1,3 +1,1 @@
-([true* . approach(t1) . (!exit(t1))* . up] false) 
-	&& ([true* . approach(t2) . (!exit(t2))* . up] false) 
-	&& ([true* . approach(t3) . (!exit(t3))* . up] false) 
+forall t: Id . ([true* . approach(t) . (!exit(t))* . up] false) 

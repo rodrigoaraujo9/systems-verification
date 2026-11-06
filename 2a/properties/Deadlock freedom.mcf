@@ -1,3 +1,1 @@
-[true*]<true* . approach(t1)>true 
-	&& [true*]<true* . approach(t2)>true
-	&& [true*]<true* . approach(t3)>true
+forall t: Id . [true*]<true* . approach(t)>true 
