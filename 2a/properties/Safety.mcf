@@ -1,3 +1,1 @@
-[true* . enter(t1) . (!leave(t1))* . up] false 
-	&& [true* . enter(t2) . (!leave(t2))* . up] false
-	&& [true* . enter(t3) . (!leave(t3))* . up] false
+forall t: Id . [true* . enter(t) . (!leave(t))* . up] false 

@@ -5,6 +5,9 @@
   <property>Mutual exclusion</property>
   <property>No premature raising</property>
   <property>Deadlock freedom</property>
+  <property>Liveness per train</property>
+  <property>Road Avaliability</property>
+  <property>Non vacuity</property>
  </properties>
  <jittyc>false</jittyc>
  <linearisation_method>regular</linearisation_method>
