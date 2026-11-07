@@ -1,5 +1,5 @@
 <root>
- <spec>2a_spec.mcrl2</spec>
+ <spec>2_spec.mcrl2</spec>
  <properties>
   <property>Safety</property>
   <property>Mutual exclusion</property>

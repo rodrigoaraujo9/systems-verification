@@ -1,5 +1,5 @@
 <root>
- <spec>1a_spec.mcrl2</spec>
+ <spec>1_spec.mcrl2</spec>
  <properties>
   <property>Safety</property>
   <property>Reachability</property>
