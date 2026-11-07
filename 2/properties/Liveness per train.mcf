@@ -1,5 +1,8 @@
-% Every approach(t) is eventually followed by enter(t).
+% For every t: TrainId, every approach(t) is eventually followed by enter(t).
 %
-% Reverse intuition:
-% - enter never happens without the approach having happened.
-forall t: Id . [(!approach(t))*.enter(t)] false
+% - enter is always reachable after approach for a given train.
+% - no train enters twice while another train waits.
+forall t, t': Id .
+  ([true* . approach(t) . (!enter(t))*] <true* . enter(t)> true) &&
+  (val(t != t') =>
+    [true* . approach(t) . (!enter(t))* . enter(t') . (!enter(t))* . enter(t')] false)
