@@ -1,1 +1,2 @@
-nu X . mu Y . (<true> true && [!up] Y && [up] X)
+% The gate is guarenteed to open infinitely often.
+[((!up)* . up)*] true && <true> true

@@ -1,2 +1,5 @@
-forall t: Id .  [true* . approach(t)] 
-    mu X . (<true> true && [!enter(t)] X) 
+% Every approach(t) is eventually followed by enter(t).
+%
+% Reverse intuition:
+% - enter never happens without the approach having happened.
+forall t: Id . [(!approach(t))*.enter(t)] false

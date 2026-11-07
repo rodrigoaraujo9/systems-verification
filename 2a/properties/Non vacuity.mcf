@@ -1,6 +1,7 @@
 % As i understood:
-% - a train can (always) get on the crossing
-% - gate raising is (always) reachable
-
-
-false
+% - a train can (always/eventually) get on the crossing
+% - gate raising is (always/eventually) reachable
+% I think here it should be eventually, so as to give meaning to the properties.
+forall t: Id . [true*] <true*.enter(t)> true &&
+[true*] <true*.raise> true &&
+[true*] <true>true

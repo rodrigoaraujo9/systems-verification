@@ -1,1 +1,3 @@
-[true* . lower_gate . true* . down_gate] <true*>true 
+% The gate can always eventually open.
+% - the nuance might be "can" instead of "must".
+[true*] <true*.up> true
