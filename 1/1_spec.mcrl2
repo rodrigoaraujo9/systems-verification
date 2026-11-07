@@ -30,7 +30,7 @@ proc
     . CONTROLLER;
 
 init
-    hide({ lower, down, grant, leave, raise, up },
+    hide({ lower, grant, leave, raise },
     allow({ approach, lower, down, grant, leave, raise, up, enter, exit},
     comm( { approach_controller | approach_train -> approach
     	  , lower_controller    | lower_gate     -> lower
