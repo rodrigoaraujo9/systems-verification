@@ -9,6 +9,8 @@
 #let seq = math.class("binary", ".")
 #let dia(x) = $lr(chevron.l #x chevron.r)$
 
+#set page(numbering: "1")
+
 #align(center)[
   #text(size: 18pt, weight: "bold")[
     Railway level crossing in mCRL2
@@ -46,11 +48,11 @@ $
   "Controller" & = "approach" dot "lower" dot "down" dot "grant" dot "leave" dot "raise" dot "up" dot "Controller"
 $
 
-Each one consists of a loop over a finite set of actions. The `Controller` enforces the ordering between the `Gate` and the `Train`'s actions. It allows the train to enter (`grant`) after the gate is `down` and raises the gate after the train `leave`s.
+Each one consists of a loop over a finite set of actions. The `Controller` enforces the ordering between the `Gate` and the `Train`'s actions. It allows the train to enter (`grant`) after the gate is `down` and `raise` the gate after the train `leave`s.
 
 == Composition
 
-Every interaction is modelled as a pair of complementary actions (e.g. `approach_train` and `approach_controller`) that `comm` merges into one synchronised action. `allow` then enforces they strictly happen simmultaneously.
+Every interaction is modelled as a pair of complementary actions (e.g. `approach_train` and `approach_controller`) that `comm` merges into one synchronised action. `allow` then ensures they occur strictly simmultaneously.
 
 ```mcrl2
 hide({ lower, grant, leave, raise },
@@ -74,7 +76,8 @@ Physical events, on the other hand, are what someone standing near the crossing 
 #grid(
   columns: (1fr, 1fr),
   gutter: 1em,
-  figure(filler("1_lts.png"), caption: [Full LTS]), figure(filler("1_lts_reduced.png"), caption: [Reduced LTS]),
+  figure(image("./assets/normal.png"), caption: [Full LTS]),
+  figure(image("./assets/branching_bisimulation.png"), caption: [Reduced LTS]),
 )
 
 // TODO: confirm the state counts with the tool.
@@ -98,13 +101,9 @@ This is the externally observable behaviour of the train passing through the cro
   [Deadlock freedom], [$[-^*] #dia($-^*; "approach"$) "true"$], [true],
 )
 
-Safety combines two conditions: the gate is never raised while the train is on the crossing, and the train only enters after a `down` that has not since been undone by an `up`. The conjunct $[(-"down")^*; "enter"] "false"$ covers the first cycle, where no `up` has happened yet. With a single train the LTS is one cycle, so every path is the same path, and the "may" formulation of Liveness coincides with the "must" one.
-
-TODO: write this better.
+The model satisfies four properties, and all of them hold. For _safety_, the train is never on the crossing while the gate is open: once a train has entered (`enter`), the gate cannot go up (`up`) until the train exits (`exit`), and a train can only enter if the gate has gone down (`down`) since it was last raised, which together guarantee the gate is closed whenever the train is on the crossing. For _reachability_, from any reachable state the gate can eventually be raised (`raise`), so the system can always return to its open state. For _liveness_, whenever a train approaches, it can eventually exit, so an approaching train is never blocked forever. Finally, for _deadlock freedom_, from any reachable state a new train can eventually approach (`approach`), so the system never gets stuck and the cycle can always restart.
 
 == Broken Variant
-
-TODO: this is filler for now.
 
 In the faulty variant, the controller issues the grant immediately after ordering the gate to lower, without waiting for the `down` acknowledgement:
 
@@ -116,11 +115,16 @@ In the faulty variant, the controller issues the grant immediately after orderin
 +  . down_controller
 ```
 
-Safety fails with the following counterexample:
+#figure(
+  image("./assets/broken.png", width: 50%),
+  caption: [Broken LTS],
+)
+
+The safety property $[(not "down")^* dot "enter"] "false"$ (no `enter` unless a `down` occurred since the last `up`) fails with the following counterexample:
 
 $"approach" seq "lower" seq "grant" seq "enter"$
 
-Here, the train is granted access while the gate is still descending, and enters before it is down. In practice, this is a train entering a crossing that may still be open to road traffic.
+Since `lower` and `grant` are hidden, the observable trace is just `approach, enter`: the train enters with no `down` before it, so the formula is violated. The gate process is still waiting to fire `down_gate`, because after `lower` the train and gate run independently and the train wins the race.
 
 = Task 2
 
