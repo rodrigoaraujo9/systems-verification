@@ -101,7 +101,7 @@ This is the externally observable behaviour of the train passing through the cro
   [Deadlock freedom], [$[-^*] #dia($-^*; "approach"$) "true"$], [true],
 )
 
-The model satisfies four properties, and all of them hold. For _safety_, the train is never on the crossing while the gate is open: once a train has entered (`enter`), the gate cannot go up (`up`) until the train exits (`exit`), and a train can only enter if the gate has gone down (`down`) since it was last raised, which together guarantee the gate is closed whenever the train is on the crossing. For _reachability_, from any reachable state the gate can eventually be raised (`raise`), so the system can always return to its open state. For _liveness_, whenever a train approaches, it can eventually exit, so an approaching train is never blocked forever. Finally, for _deadlock freedom_, from any reachable state a new train can eventually approach (`approach`), so the system never gets stuck and the cycle can always restart.
+The model satisfies all four properties. For _safety_, the train is never on the crossing while the gate is open: once a train has entered (`enter`), the gate cannot be raised (`up`) until the train exits (`exit`). Furthermore, a train can only enter if the gate has been lowered (`down`) since it was last raised, ensuring that the gate remains closed whenever the train is on the crossing. For _reachability_, from any reachable state, the gate can eventually be raised (`raise`), allowing the system to return to its open state. For _liveness_, whenever a train approaches (`approach`), it can eventually exit (`exit`), ensuring that it is not permanently prevented from completing its passage. Finally, for _deadlock freedom_, from any reachable state, a new train can eventually approach (`approach`), meaning the system can continue making progress and the cycle can restart.
 
 == Broken Variant
 
@@ -154,7 +154,7 @@ where $Q triangle.l.small t$ appends $t$ to the end of $Q$. We chose a queue ove
 
 == Properties
 
-All properties are quantified over $t in "Id"$, and over $t' != t$ where $t'$ appears.
+All properties are quantified over $t, t' in "Id"$, s.t. $t != t'$.
 
 // TODO: confirm all results on the current model (queue + leave-only controller).
 #table(
@@ -176,13 +176,91 @@ All properties are quantified over $t in "Id"$, and over $t' != t$ where $t'$ ap
   [true],
 )
 
-Property 3 checks `raise`, the controller's decision to open. Once raised, the gate always finishes with `up`, even if a train approached meanwhile; the controller then lowers it again before any `grant`. Property 8 makes sure the premises of 1--3 are reachable, so they do not hold vacuously.
+=== Safety (1--3)
 
-*Liveness and fairness (5).* Without fixpoints we cannot say that `enter(t)` *must* happen, so we check two things: `enter(t)` stays reachable while $t$ waits (5a), and no other train enters twice in the meantime (5b) ($t' != t$, since $t$'s own next trip is normal). With a set, a train could be overtaken forever and we would need to assume fairness between trains. The queue removes that: a waiting train is overtaken at most $N - 1$ times, so we only assume the system keeps running (property 4).
+The first three properties ensure that the crossing is used safely.
+A train can only enter when the gate is fully down (1), and only
+one train can occupy the crossing at a time (2). The gate can only
+start opening when the crossing is free and no trains are waiting.
+If a train approaches while the gate is opening, the gate must
+close again before granting access (3).
 
-// TODO: [R*] true holds in every model, so 7 as written does not test anything.
-*Infinite opening (7).* The controller cannot guarantee this. If trains keep arriving, $Q$ never empties and the gate never opens. A counterexample would mean that, under heavy traffic, cars wait for as long as trains keep coming. This is a loss of availability, not of safety, and property 6 shows that opening is always still possible.
+=== Liveness (4--5)
+
+These properties ensure that the system continues to make progress.
+A train can always approach the crossing (4), and every waiting
+train remains able to enter (5a). The FIFO queue also prevents
+indefinite overtaking, since no other train can enter twice before
+the waiting train gets its turn (5b). Assuming the system continues
+to execute actions, every waiting train eventually enters.
+
+=== Availability (6--8)
+
+The gate can always eventually return to the open position (6).
+However, continuous train arrivals may prevent the queue from
+becoming empty, so recurring openings cannot be guaranteed (7).
+Finally, non-vacuity (8) ensures that train entry, gate raising
+and system transitions are reachable, making the verification
+meaningful.
 
 == Broken Variant
 
+Three faulty variants are introduced to test whether the verified properties detect incorrect controller behaviour.
+
+=== Naive Raise
+
+The controller starts raising the gate immediately after a train exits, without checking whether other trains are still waiting:
+
+```diff-mcrl2
+   leave_controller(head(queue))
+-  . CONTROLLER(tail(queue), free, gate)
++  . CONTROLLER(tail(queue), free, opening)
+```
+
+The safety property (3) fails with the following counterexample:
+
+$"approach"(t_1) seq "lower" seq "down" seq "grant"(t_1) seq "enter"(t_1) seq "approach"(t_2) seq "exit"(t_1) seq "leave"(t_1) seq "raise"$
+
+Train $t_2$ is still waiting when the controller raises the gate after $t_1$ exits. The controller therefore starts opening the gate before all waiting trains have been served.
+
+=== Missed Increment
+
+An approaching train is not added to the queue when another train is already crossing:
+
+```diff-mcrl2
+   approach_controller(t)
+-  . CONTROLLER(queue <| t, crossing, gate)
++  . CONTROLLER(queue, crossing, gate)
+```
+
+The liveness property (5a) fails with the following counterexample:
+
+$"approach"(t_1) seq "lower" seq "down" seq "grant"(t_1) seq "enter"(t_1) seq "approach"(t_2)$
+
+Since $t_2$ is not recorded in the queue, the controller never grants it access. Its entry is no longer reachable, even after $t_1$ leaves.
+
+=== Off-by-One
+
+The controller incorrectly updates the crossing state when a train exits, leaving it marked as busy even when the crossing is empty:
+
+```diff-mcrl2
+   leave_controller(head(queue))
+-  . CONTROLLER(tail(queue), free, gate)
++  . CONTROLLER(tail(queue), busy, gate)
+```
+
+The road availability property (6) fails with the following counterexample:
+
+$"approach"(t_1) seq "lower" seq "down" seq "grant"(t_1) seq "enter"(t_1) seq "exit"(t_1) seq "leave"(t_1)$
+
+Although $t_1$ has left the crossing and the queue is empty, the controller still considers the crossing busy. It can therefore never start raising the gate, preventing the road from reopening.
+
+== State Space and Abstraction
+
+For $N = 1$ to $6$ the full LTS has 10, 31, 108, 451, 2278 and 13695 states, respectively. The reduced LTS has exactly the same number of states for each value of $N$. This means that the reduction does not remove states, but instead hides internal handshake actions while preserving the state space. Both LTSs grow quickly with $N$, because the trains interleave freely and the controller keeps a queue of waiting trains.
+
+The trains are symmetric: they run the same process and the controller serves them first-in-first-out, so swapping the IDs maps the LTS onto itself. Reduction keeps this symmetry, since each train's actions have their own labels.
+
 = Conclusion
+
+In this assignment, we modelled a railway level crossing with both a single train and multiple trains, using mCRL2 to verify its behaviour. We saw how the controller coordinates the trains and the gate to ensure safe crossing and avoid conflicts. By testing faulty variants, we also understood how small mistakes in the controller can lead to safety and liveness problems, and how counterexamples help identify them. Overall, this work gave us a better understanding of how formal verification can be used to detect edge cases and prevent errors in concurrent systems.
