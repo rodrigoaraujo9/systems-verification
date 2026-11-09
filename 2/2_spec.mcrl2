@@ -53,7 +53,7 @@ proc
             up_controller . CONTROLLER(queue, crossing, open));
 
 init
-    hide({lower, down}, 
+    hide({lower, grant},
 		allow({ approach, lower, down, grant, leave, raise, up, enter, exit },
         comm( { approach_controller | approach_train -> approach
               , lower_controller    | lower_gate     -> lower

@@ -1,1 +1,4 @@
-forall t: Id . [true* . enter(t) . (!leave(t))* . up] false 
+forall t: Id .
+     [true* . enter(t) . (!exit(t))* . up] false
+  && [(!down)* . enter(t)] false
+  && [true* . up . (!down)* . enter(t)] false

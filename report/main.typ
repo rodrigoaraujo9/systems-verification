@@ -57,16 +57,17 @@ Each one consists of a loop over a finite set of actions. The `Controller` enfor
 Every interaction is modelled as a pair of complementary actions (e.g. `approach_train` and `approach_controller`) that `comm` merges into one synchronised action. `allow` then ensures they occur strictly simmultaneously.
 
 ```mcrl2
-hide({ lower, grant, leave, raise },
+hide({ lower, grant },
 allow({ approach, lower, down, grant, leave, raise, up, enter, exit },
 comm({ approach_controller | approach_train -> approach, ... },
      TRAIN || GATE || CONTROLLER )));
 ```
 
 For inspection, we split the actions into messages and physical events. Messages are internal handshakes between the components and cannot be observed from the outside, so we hide them:
-- *`lower`, `raise`:* the commands to the gate;
-- *`grant`:* the permission to cross;
-- *`leave`:* the train's notification that it left.
+- *`lower`:* the command to the gate;
+- *`grant`:* the permission to cross.
+
+The messages `leave` and `raise` stay visible, because the properties below refer to them.
 
 Physical events, on the other hand, are what someone standing near the crossing would observe, so they remain visible:
 - *`approach`:* the train arriving;
@@ -160,17 +161,23 @@ where $Q triangle.l.small t$ appends $t$ to the end of $Q$. We chose a queue ove
 
 == Properties
 
-All properties are quantified over $t in "Id"$, and some with $t in "Id" $ s.t. $t != t'$ as well.
+All properties are quantified over $t in "Id"$, and some with $t in "Id"$ s.t. $t != t'$ as well.
 
 // TODO: confirm all results on the current model (queue + leave-only controller).
 #table(
   columns: (auto, 1fr, auto),
   [*Property*], [*Formula*], [*Result*],
-  [#metadata(none)<prop-1>1. Safety], [$[-^*; "enter"(t); (-"leave"(t))^*; "up"] "false"$], [true],
+  [#metadata(none)<prop-1>1. Safety],
+  [$[-^*; "enter"(t); (-"exit"(t))^*; "up"] "false" and [(-"down")^*; "enter"(t)] "false" and [-^*; "up"; (-"down")^*; "enter"(t)] "false"$],
+  [true],
+
   [#metadata(none)<prop-2>2. Mutual exclusion], [$[-^*; "enter"(t); (-"exit"(t))^*; "enter"(t')] "false"$], [true],
   [#metadata(none)<prop-3>3. No premature raise], [$[-^*; "approach"(t); (-"leave"(t))^*; "raise"] "false"$], [true],
   [#metadata(none)<prop-4>4. Deadlock freedom], [$[-^*] #dia($-^*; "approach"(t)$) "true"$], [true],
-  [#metadata(none)<prop-5a>5a. Liveness (reach)], [$[-^*; "approach"(t); (-"enter"(t))^*] #dia($-^*; "enter"(t)$) "true"$], [true],
+  [#metadata(none)<prop-5a>5a. Liveness (reach)],
+  [$[-^*; "approach"(t); (-"enter"(t))^*] #dia($-^*; "enter"(t)$) "true"$],
+  [true],
+
   [#metadata(none)<prop-5b>5b. Liveness (order)],
   [$[-^*; "approach"(t); (-"enter"(t))^*; "enter"(t'); \ (-"enter"(t))^*; "enter"(t')] "false"$],
   [true],
@@ -273,7 +280,7 @@ Although $t_1$ has left the crossing and the queue is empty, the controller stil
 
 For $N = 1$ to $6$ the full LTS (@fig:full-lts-2) has 10, 31, 108, 451, 2278 and 13695 states, respectively. The reduced LTS (@fig:reduced-lts-2) has 8, 23, 78, 323, 1628 and 9783. Both LTSs grow quickly with $N$, because the trains interleave freely and the controller keeps a queue of waiting trains.
 
-The reduction comes from hiding the `lower` and `down` handshakes between the controller and the gate. These actions only move the gate from open to closed and are not visible to the trains. After hiding they become $tau$ steps, and the reduction merges the states that were connected only by these steps. This removes ≈26.5% of the states, and the gain stays similar as $N$ grows, since the reduced LTS is ≈73.5% of the full one for every $N$.
+The reduction comes from hiding the `lower` and `grant` handshakes, as in Task 1. These are internal messages, not events visible at the crossing. After hiding they become $tau$ steps, and the reduction merges the states that were connected only by these steps. This removes ≈26.5% of the states, and the gain stays similar as $N$ grows, since the reduced LTS is ≈73.5% of the full one on average.
 
 The trains are symmetric. They all run the same process, and the controller serves them in FIFO order, so swapping the IDs of two trains maps the LTS onto itself. The reduction preserves this symmetry, because the actions of each train keep their own labels and are never merged with those of another train.
 

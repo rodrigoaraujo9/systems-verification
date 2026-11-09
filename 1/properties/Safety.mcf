@@ -1,2 +1,3 @@
-([true* . enter . (!exit)* . up . true* . exit] false)
-	&& ([true* . up . (!down)* . enter] false)
+[true* . enter . (!exit)* . up] false
+&& [(!down)* . enter] false
+&& [true* . up . (!down)* . enter] false
