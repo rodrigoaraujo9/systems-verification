@@ -3,9 +3,6 @@
 #show raw: set text(size: 8.8pt)
 #show raw.where(block: true): codly.new
 
-#let filler(name) = rect(width: 100%, height: 3.5cm, stroke: (dash: "dashed"))[
-  #align(center + horizon)[TODO: screenshot #name]
-]
 #let seq = math.class("binary", ".")
 #let dia(x) = $lr(chevron.l #x chevron.r)$
 #let pr(id, body: none) = link(label("prop-" + id), if body == none { id } else { body })
@@ -281,7 +278,7 @@ Although $t_1$ has left the crossing and the queue is empty, the controller stil
   [#figure(image("./assets/branching_bisimulation_2.png"), caption: [Reduced LTS]) <fig:reduced-lts-2>],
 )
 
-For $N = 1$ to $6$ the full LTS (@fig:full-lts-2) has 10, 31, 108, 451, 2278 and 13695 states, respectively. The reduced LTS (@fig:reduced-lts-2) has 8, 23, 78, 323, 1628 and 9783. Both LTSs grow quickly with $N$, because the trains interleave freely and the controller keeps a queue of waiting trains.
+For $N = 1$ to $6$ the full LTS (@fig:full-lts-2) has 10, 31, 108, 451, 2278 and 13695 states, and 12, 50, 200, 882, 4532 and 27362 transitions, respectively. The reduced LTS (@fig:reduced-lts-2) has 8, 23, 78, 323, 1628 and 9783 states, and 10, 38, 146, 634, 3242 and 19550 transitions. Both LTSs grow quickly with $N$, because the trains interleave freely and the controller keeps a queue of waiting trains.
 
 The reduction comes from hiding the `lower` and `grant` handshakes, as in Task 1. These are internal messages, not events visible at the crossing. After hiding they become $tau$ steps, and the reduction merges the states that were connected only by these steps. This removes ≈26.5% of the states, and the gain stays similar as $N$ grows, since the reduced LTS is ≈73.5% of the full one on average.
 
