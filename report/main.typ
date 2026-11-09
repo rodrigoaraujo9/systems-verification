@@ -76,16 +76,12 @@ Physical events, on the other hand, are what someone standing near the crossing 
 #grid(
   columns: (1fr, 1fr),
   gutter: 1em,
-  figure(image("./assets/normal.png"), caption: [Full LTS]),
-  figure(image("./assets/branching_bisimulation.png"), caption: [Reduced LTS]),
+  [#figure(image("./assets/normal.png"), caption: [Full LTS]) <fig:full-lts>],
+  [#figure(image("./assets/branching_bisimulation.png"), caption: [Reduced LTS]) <fig:reduced-lts>],
 )
 
 // TODO: confirm the state counts with the tool.
-The full LTS is a single cycle of 9 states, four of whose transitions are $tau$ (the hidden messages). None of these $tau$-steps removes a choice, so branching bisimulation collapses them, leaving a cycle of 5 states made only of the physical events:
-
-$ "approach" -> "down" -> "enter" -> "exit" -> "up" -> "approach" $
-
-This is the externally observable behaviour of the train passing through the crossing.
+The full LTS (@fig:full-lts) is a single cycle of 9 states, four of whose transitions are $tau$ (the hidden messages). None of these $tau$-steps removes a choice, so branching bisimulation collapses them, leaving a cycle of 5 states made only of the physical events (@fig:reduced-lts). This is the externally observable behaviour of the train passing through the crossing.
 
 == Properties
 
@@ -101,7 +97,15 @@ This is the externally observable behaviour of the train passing through the cro
   [Deadlock freedom], [$[-^*] #dia($-^*; "approach"$) "true"$], [true],
 )
 
-The model satisfies all four properties. For _safety_, the train is never on the crossing while the gate is open: once a train has entered (`enter`), the gate cannot be raised (`up`) until the train exits (`exit`). Furthermore, a train can only enter if the gate has been lowered (`down`) since it was last raised, ensuring that the gate remains closed whenever the train is on the crossing. For _reachability_, from any reachable state, the gate can eventually be raised (`raise`), allowing the system to return to its open state. For _liveness_, whenever a train approaches (`approach`), it can eventually exit (`exit`), ensuring that it is not permanently prevented from completing its passage. Finally, for _deadlock freedom_, from any reachable state, a new train can eventually approach (`approach`), meaning the system can continue making progress and the cycle can restart.
+The model satisfies all four properties.
+
+- For _safety_, the train is never on the crossing while the gate is open: once a train has entered (`enter`), the gate cannot be raised (`up`) until the train exits (`exit`). Furthermore, a train can only enter if the gate has been lowered (`down`) since it was last raised, ensuring that the gate remains closed whenever the train is on the crossing.
+
+- For _reachability_, from any reachable state, the gate can eventually be raised (`raise`), allowing the system to return to its open state.
+
+- For _liveness_, whenever a train approaches (`approach`), it can eventually exit (`exit`), ensuring that it is not permanently prevented from completing its passage.
+
+- Finally, for _deadlock freedom_, from any reachable state, a new train can eventually approach (`approach`), meaning the system can continue making progress and the cycle can restart.
 
 == Broken Variant
 
