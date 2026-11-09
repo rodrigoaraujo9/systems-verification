@@ -158,7 +158,7 @@ where $Q triangle.l.small t$ appends $t$ to the end of $Q$. We chose a queue ove
 
 == Properties
 
-All properties are quantified over $t, t' in "Id"$, s.t. $t != t'$.
+All properties are quantified over $t in "Id"$, and some with $t in "Id" $ s.t. $t != t'$ as well.
 
 // TODO: confirm all results on the current model (queue + leave-only controller).
 #table(
