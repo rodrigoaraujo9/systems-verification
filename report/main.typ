@@ -213,7 +213,7 @@ Three faulty variants are introduced to test whether the verified properties det
 
 === Naive Raise
 
-The controller starts raising the gate immediately after a train exits, without checking whether other trains are still waiting:
+The controller moves to the `opening` state immediately after a train leaves, without checking whether other trains are still waiting and without performing the `raise` handshake with the gate:
 
 ```diff-mcrl2
    leave_controller(head(queue))
@@ -221,11 +221,11 @@ The controller starts raising the gate immediately after a train exits, without 
 +  . CONTROLLER(tail(queue), free, opening)
 ```
 
-The safety property (3) fails with the following counterexample:
+The liveness property (5a) fails with the following counterexample:
 
-$"approach"(t_1) seq "lower" seq "down" seq "grant"(t_1) seq "enter"(t_1) seq "approach"(t_2) seq "exit"(t_1) seq "leave"(t_1) seq "raise"$
+$"approach"(t_1) seq "lower" seq "down" seq "grant"(t_1) seq "enter"(t_1) seq "approach"(t_2) seq "exit"(t_1) seq "leave"(t_1)$
 
-Train $t_2$ is still waiting when the controller raises the gate after $t_1$ exits. The controller therefore starts opening the gate before all waiting trains have been served.
+After $"leave"(t_1)$ the controller is in the `opening` state with $t_2$ still in the queue. It now only offers `up`, but the gate still waits for `raise`, so the two can never synchronise. The gate stays closed, `grant` requires an open-to-closed cycle that never happens again, and $t_2$ can no longer enter. This is the same behaviour for every train that is queued, and once all trains are queued the system deadlocks. Hence properties 4 (deadlock freedom), 5a (liveness), 6 (road availability), 7 (infinite opening) and 8 (non-vacuity, since `raise` is unreachable) fail. Property 3 still holds, as `raise` never occurs.
 
 === Missed Increment
 
@@ -241,11 +241,11 @@ The liveness property (5a) fails with the following counterexample:
 
 $"approach"(t_1) seq "lower" seq "down" seq "grant"(t_1) seq "enter"(t_1) seq "approach"(t_2)$
 
-Since $t_2$ is not recorded in the queue, the controller never grants it access. Its entry is no longer reachable, even after $t_1$ leaves.
+Since $t_2$ is not recorded in the queue, the controller never grants it access. The train stays blocked at its `grant` action, so its entry is no longer reachable, even after $t_1$ leaves. The same happens to every train that approaches while the crossing is busy. Once all trains are lost this way, the controller can no longer synchronise on `approach` or `lower`, and the system deadlocks with the gate open. Hence properties 4 (deadlock freedom), 5a (liveness), 6 (road availability, since `up` is unreachable from the deadlocked state) and 7 (infinite opening) fail. Properties 1 to 3 still hold, as the behaviour of the trains that are queued is unchanged, and (8) holds because `enter`, `raise` and further transitions remain reachable from the initial state.
 
 === Off-by-One
 
-The controller incorrectly updates the crossing state when a train exits, leaving it marked as busy even when the crossing is empty:
+The controller incorrectly updates the crossing state when a train leaves, keeping it marked as busy even though the crossing is empty:
 
 ```diff-mcrl2
    leave_controller(head(queue))
@@ -257,9 +257,17 @@ The road availability property (6) fails with the following counterexample:
 
 $"approach"(t_1) seq "lower" seq "down" seq "grant"(t_1) seq "enter"(t_1) seq "exit"(t_1) seq "leave"(t_1)$
 
-Although $t_1$ has left the crossing and the queue is empty, the controller still considers the crossing busy. It can therefore never start raising the gate, preventing the road from reopening.
+Although $t_1$ has left the crossing and the queue is empty, the controller still considers the crossing busy. Both `grant` and `raise` require $c = "free"$, so neither can ever happen again, and the gate stays closed. A train $t_2$ that approaches afterwards is queued but never granted access, since the head of the queue waits for a `leave` that its train can never produce. Once every train is stuck in the queue, no train can approach any more and the system deadlocks. Hence properties 4 (deadlock freedom), 5a (liveness), 6 (road availability), 7 (infinite opening) and 8 (non-vacuity, since `raise` is unreachable) fail. Properties 1 to 3 and 5b still hold, because neither `up` nor a second `enter` ever occurs.
 
 == State Space and Abstraction
+
+
+#grid(
+  columns: (1fr, 1fr),
+  gutter: 1em,
+  [#figure(image("./assets/normal_2.png"), caption: [Full LTS]) <fig:full-lts-2>],
+  [#figure(image("./assets/branching_bisimulation_2.png"), caption: [Reduced LTS]) <fig:reduced-lts-2>],
+)
 
 For $N = 1$ to $6$ the full LTS has 10, 31, 108, 451, 2278 and 13695 states, respectively. The reduced LTS has 8, 23, 78, 323, 1628 and 9783. Both LTSs grow quickly with $N$, because the trains interleave freely and the controller keeps a queue of waiting trains.
 
