@@ -1,3 +1,4 @@
-forall t: Id . [true*] <true*.enter(t)> true &&
-[true*] <true*.raise> true &&
-[true*] <true>true
+forall t: Id .
+      <true* . enter(t)> true                % Safety: a train can be on the crossing
+   && <true* . up . true* . enter(t)> true   % Safety: a train can enter after the gate went up
+   && <true* . approach(t)> true             % No premature raising: a train can be waiting

@@ -190,7 +190,7 @@ All properties are quantified over $t in "Id"$, and some with $t in "Id"$ s.t. $
   [false],
 
   [#metadata(none)<prop-8>8. Non-vacuity],
-  [$[-^*] #dia($-^*; "enter"(t)$) "true" and [-^*] #dia($-^*; "raise"$) "true" and [-^*] #dia($-$) "true"$],
+  [$#dia($-^*; "enter"(t)$) "true" and #dia($-^*; "up"; -^*; "enter"(t)$) "true" and #dia($-^*; "approach"(t)$) "true"$],
   [true],
 )
 
@@ -219,9 +219,10 @@ However, continuous train arrivals may prevent the queue from
 becoming empty, so recurring openings cannot be guaranteed (#pr("7")).
 We present a counterexample: $t_1$ and $t_2$ keep re-approaching,
 so the queue never empties.
-Finally, non-vacuity (#pr("8")) ensures that train entry, gate raising
-and system transitions are reachable, making the verification
-meaningful.
+Finally, non-vacuity (#pr("8")) ensures that the situations described
+by (#pr("1")) and (#pr("3")) can actually happen: a train can approach, a
+train can enter, and a train can enter after the gate was raised.
+Otherwise, these properties would hold trivially.
 
 == Broken Variant
 
@@ -257,7 +258,7 @@ The liveness property (#pr("5a")) fails with the following counterexample:
 
 $"approach"(t_1) seq "lower" seq "down" seq "grant"(t_1) seq "enter"(t_1) seq "approach"(t_2)$
 
-Since $t_2$ is not recorded in the queue, the controller never grants it access. The train stays blocked at its `grant` action, so its entry is no longer reachable, even after $t_1$ leaves. The same happens to every train that approaches while the crossing is busy. The train that is crossing is never lost, so the system does not deadlock, but the lost trains can never approach again. Hence properties #pr("3") (no premature raising, since the gate is raised once $t_1$ leaves while $t_2$ is still waiting), #pr("4") (deadlock freedom), #pr("5a") (liveness), #pr("7") (infinite opening, since trains that approach while the crossing is free are still queued) and #pr("8") (non-vacuity, since the entry of a lost train is unreachable) fail. Properties #pr("1"), #pr("2") and #pr("6") still hold, as the behaviour of the trains that are queued is unchanged and the gate can still open once the queue is empty.
+Since $t_2$ is not recorded in the queue, the controller never grants it access. The train stays blocked at its `grant` action, so its entry is no longer reachable, even after $t_1$ leaves. The same happens to every train that approaches while the crossing is busy. The train that is crossing is never lost, so the system does not deadlock, but the lost trains can never approach again. Hence properties #pr("3") (no premature raising, since the gate is raised once $t_1$ leaves while $t_2$ is still waiting), #pr("4") (deadlock freedom), #pr("5a") (liveness) and #pr("7") (infinite opening, since trains that approach while the crossing is free are still queued) fail. Properties #pr("1"), #pr("2") and #pr("6") still hold, as the behaviour of the trains that are queued is unchanged and the gate can still open once the queue is empty, and (#pr("8")) holds because approach and entry remain reachable from the initial state.
 
 === Off-by-One
 
