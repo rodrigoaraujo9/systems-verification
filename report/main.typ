@@ -8,6 +8,8 @@
 ]
 #let seq = math.class("binary", ".")
 #let dia(x) = $lr(chevron.l #x chevron.r)$
+// Clickable reference to a Task 2 property row.
+#let pr(id, body: none) = link(label("prop-" + id), if body == none { id } else { body })
 
 #set page(numbering: "1")
 
@@ -88,28 +90,28 @@ The full LTS (@fig:full-lts) is a single cycle of 9 states, two of whose transit
 #table(
   columns: (auto, 1fr, auto),
   [*Property*], [*Formula*], [*Result*],
-  [Safety],
+  [#metadata(none)<t1-safety>Safety],
   [$[-^*; "enter"; (-"exit")^*; "up"] "false" and [(-"down")^*; "enter"] "false" and [-^*; "up"; (-"down")^*; "enter"] "false"$],
   [true],
 
-  [Reachability], [$[-^*; "leave"] #dia($-^*; "raise"$) "true"$], [true],
-  [Liveness], [$[-^*; "approach"] #dia($-^*; "exit"$) "true"$], [true],
-  [Deadlock freedom], [$[-^*] #dia($-^*; "approach"$) "true"$], [true],
+  [#metadata(none)<t1-reachability>Reachability], [$[-^*; "leave"] #dia($-^*; "raise"$) "true"$], [true],
+  [#metadata(none)<t1-liveness>Liveness], [$[-^*; "approach"] #dia($-^*; "exit"$) "true"$], [true],
+  [#metadata(none)<t1-deadlock>Deadlock freedom], [$[-^*] #dia($-^*; "approach"$) "true"$], [true],
 )
 
 The model satisfies all four properties.
 
-- For _safety_, the train is never on the crossing while the gate is open: once a train has entered (`enter`), the gate cannot be raised (`up`) until the train exits (`exit`). Furthermore, a train can only enter if the gate has been lowered (`down`) since it was last raised, ensuring that the gate remains closed whenever the train is on the crossing.
+- For #link(<t1-safety>)[_safety_], the train is never on the crossing while the gate is open: once a train has entered (`enter`), the gate cannot be raised (`up`) until the train exits (`exit`). Furthermore, a train can only enter if the gate has been lowered (`down`) since it was last raised, ensuring that the gate remains closed whenever the train is on the crossing.
 
-- For _reachability_, from any reachable state, the gate can eventually be raised (`raise`), allowing the system to return to its open state.
+- For #link(<t1-reachability>)[_reachability_], from any reachable state, the gate can eventually be raised (`raise`), allowing the system to return to its open state.
 
-- For _liveness_, whenever a train approaches (`approach`), it can eventually exit (`exit`), ensuring that it is not permanently prevented from completing its passage.
+- For #link(<t1-liveness>)[_liveness_], whenever a train approaches (`approach`), it can eventually exit (`exit`), ensuring that it is not permanently prevented from completing its passage.
 
-- Finally, for _deadlock freedom_, from any reachable state, a new train can eventually approach (`approach`), meaning the system can continue making progress and the cycle can restart.
+- Finally, for #link(<t1-deadlock>)[_deadlock freedom_], from any reachable state, a new train can eventually approach (`approach`), meaning the system can continue making progress and the cycle can restart.
 
 == Broken Variant
 
-In the faulty variant, the controller issues the grant immediately after ordering the gate to lower, without waiting for the `down` acknowledgement:
+In the faulty variant (@fig:broken-lts), the controller issues the grant immediately after ordering the gate to lower, without waiting for the `down` acknowledgement:
 
 ```diff-mcrl2
    approach_controller
@@ -122,9 +124,9 @@ In the faulty variant, the controller issues the grant immediately after orderin
 #figure(
   image("./assets/broken.png", width: 50%),
   caption: [Broken LTS],
-)
+) <fig:broken-lts>
 
-The safety property $[(not "down")^* dot "enter"] "false"$ (no `enter` unless a `down` occurred since the last `up`) fails with the following counterexample:
+The #link(<t1-safety>)[safety property] $[(not "down")^* dot "enter"] "false"$ (no `enter` unless a `down` occurred since the last `up`) fails with the following counterexample:
 
 $"approach" seq "lower" seq "grant" seq "enter"$
 
@@ -164,46 +166,46 @@ All properties are quantified over $t in "Id"$, and some with $t in "Id" $ s.t. 
 #table(
   columns: (auto, 1fr, auto),
   [*Property*], [*Formula*], [*Result*],
-  [1. Safety], [$[-^*; "enter"(t); (-"leave"(t))^*; "up"] "false"$], [true],
-  [2. Mutual exclusion], [$[-^*; "enter"(t); (-"exit"(t))^*; "enter"(t')] "false"$], [true],
-  [3. No premature raise], [$[-^*; "approach"(t); (-"leave"(t))^*; "raise"] "false"$], [true],
-  [4. Deadlock freedom], [$[-^*] #dia($-^*; "approach"(t)$) "true"$], [true],
-  [5a. Liveness (reach)], [$[-^*; "approach"(t); (-"enter"(t))^*] #dia($-^*; "enter"(t)$) "true"$], [true],
-  [5b. Liveness (order)],
+  [#metadata(none)<prop-1>1. Safety], [$[-^*; "enter"(t); (-"leave"(t))^*; "up"] "false"$], [true],
+  [#metadata(none)<prop-2>2. Mutual exclusion], [$[-^*; "enter"(t); (-"exit"(t))^*; "enter"(t')] "false"$], [true],
+  [#metadata(none)<prop-3>3. No premature raise], [$[-^*; "approach"(t); (-"leave"(t))^*; "raise"] "false"$], [true],
+  [#metadata(none)<prop-4>4. Deadlock freedom], [$[-^*] #dia($-^*; "approach"(t)$) "true"$], [true],
+  [#metadata(none)<prop-5a>5a. Liveness (reach)], [$[-^*; "approach"(t); (-"enter"(t))^*] #dia($-^*; "enter"(t)$) "true"$], [true],
+  [#metadata(none)<prop-5b>5b. Liveness (order)],
   [$[-^*; "approach"(t); (-"enter"(t))^*; "enter"(t'); \ (-"enter"(t))^*; "enter"(t')] "false"$],
   [true],
 
-  [6. Road availability], [$[-^*] #dia($-^*; "up"$) "true"$], [true],
-  [7. Infinite opening], [$[((-"up")^*; "up")^*] "true" and #dia($-$) "true"$], [true],
-  [8. Non-vacuity],
+  [#metadata(none)<prop-6>6. Road availability], [$[-^*] #dia($-^*; "up"$) "true"$], [true],
+  [#metadata(none)<prop-7>7. Infinite opening], [$[((-"up")^*; "up")^*] "true" and #dia($-$) "true"$], [true],
+  [#metadata(none)<prop-8>8. Non-vacuity],
   [$[-^*] #dia($-^*; "enter"(t)$) "true" and [-^*] #dia($-^*; "raise"$) "true" and [-^*] #dia($-$) "true"$],
   [true],
 )
 
-=== Safety (1--3)
+=== Safety (#pr("1")--#pr("3"))
 
 The first three properties ensure that the crossing is used safely.
-A train can only enter when the gate is fully down (1), and only
-one train can occupy the crossing at a time (2). The gate can only
+A train can only enter when the gate is fully down (#pr("1")), and only
+one train can occupy the crossing at a time (#pr("2")). The gate can only
 start opening when the crossing is free and no trains are waiting.
 If a train approaches while the gate is opening, the gate must
-close again before granting access (3).
+close again before granting access (#pr("3")).
 
-=== Liveness (4--5)
+=== Liveness (#pr("4")--#pr("5a", body: "5"))
 
 These properties ensure that the system continues to make progress.
-A train can always approach the crossing (4), and every waiting
-train remains able to enter (5a). The FIFO queue also prevents
+A train can always approach the crossing (#pr("4")), and every waiting
+train remains able to enter (#pr("5a")). The FIFO queue also prevents
 indefinite overtaking, since no other train can enter twice before
-the waiting train gets its turn (5b). Assuming the system continues
+the waiting train gets its turn (#pr("5b")). Assuming the system continues
 to execute actions, every waiting train eventually enters.
 
-=== Availability (6--8)
+=== Availability (#pr("6")--#pr("8"))
 
-The gate can always eventually return to the open position (6).
+The gate can always eventually return to the open position (#pr("6")).
 However, continuous train arrivals may prevent the queue from
-becoming empty, so recurring openings cannot be guaranteed (7).
-Finally, non-vacuity (8) ensures that train entry, gate raising
+becoming empty, so recurring openings cannot be guaranteed (#pr("7")).
+Finally, non-vacuity (#pr("8")) ensures that train entry, gate raising
 and system transitions are reachable, making the verification
 meaningful.
 
@@ -221,11 +223,11 @@ The controller moves to the `opening` state immediately after a train leaves, wi
 +  . CONTROLLER(tail(queue), free, opening)
 ```
 
-The liveness property (5a) fails with the following counterexample:
+The liveness property (#pr("5a")) fails with the following counterexample:
 
 $"approach"(t_1) seq "lower" seq "down" seq "grant"(t_1) seq "enter"(t_1) seq "approach"(t_2) seq "exit"(t_1) seq "leave"(t_1)$
 
-After $"leave"(t_1)$ the controller is in the `opening` state with $t_2$ still in the queue. It now only offers `up`, but the gate still waits for `raise`, so the two can never synchronise. The gate stays closed, `grant` requires an open-to-closed cycle that never happens again, and $t_2$ can no longer enter. This is the same behaviour for every train that is queued, and once all trains are queued the system deadlocks. Hence properties 4 (deadlock freedom), 5a (liveness), 6 (road availability), 7 (infinite opening) and 8 (non-vacuity, since `raise` is unreachable) fail. Property 3 still holds, as `raise` never occurs.
+After $"leave"(t_1)$ the controller is in the `opening` state with $t_2$ still in the queue. It now only offers `up`, but the gate still waits for `raise`, so the two can never synchronise. The gate stays closed, `grant` requires an open-to-closed cycle that never happens again, and $t_2$ can no longer enter. This is the same behaviour for every train that is queued, and once all trains are queued the system deadlocks. Hence properties #pr("4") (deadlock freedom), #pr("5a") (liveness), #pr("6") (road availability), #pr("7") (infinite opening) and #pr("8") (non-vacuity, since `raise` is unreachable) fail. Property #pr("3") still holds, as `raise` never occurs.
 
 === Missed Increment
 
@@ -237,11 +239,11 @@ An approaching train is not added to the queue when another train is already cro
 +  . CONTROLLER(queue, crossing, gate)
 ```
 
-The liveness property (5a) fails with the following counterexample:
+The liveness property (#pr("5a")) fails with the following counterexample:
 
 $"approach"(t_1) seq "lower" seq "down" seq "grant"(t_1) seq "enter"(t_1) seq "approach"(t_2)$
 
-Since $t_2$ is not recorded in the queue, the controller never grants it access. The train stays blocked at its `grant` action, so its entry is no longer reachable, even after $t_1$ leaves. The same happens to every train that approaches while the crossing is busy. Once all trains are lost this way, the controller can no longer synchronise on `approach` or `lower`, and the system deadlocks with the gate open. Hence properties 4 (deadlock freedom), 5a (liveness), 6 (road availability, since `up` is unreachable from the deadlocked state) and 7 (infinite opening) fail. Properties 1 to 3 still hold, as the behaviour of the trains that are queued is unchanged, and (8) holds because `enter`, `raise` and further transitions remain reachable from the initial state.
+Since $t_2$ is not recorded in the queue, the controller never grants it access. The train stays blocked at its `grant` action, so its entry is no longer reachable, even after $t_1$ leaves. The same happens to every train that approaches while the crossing is busy. Once all trains are lost this way, the controller can no longer synchronise on `approach` or `lower`, and the system deadlocks with the gate open. Hence properties #pr("4") (deadlock freedom), #pr("5a") (liveness), #pr("6") (road availability, since `up` is unreachable from the deadlocked state) and #pr("7") (infinite opening) fail. Properties #pr("1") to #pr("3") still hold, as the behaviour of the trains that are queued is unchanged, and (#pr("8")) holds because `enter`, `raise` and further transitions remain reachable from the initial state.
 
 === Off-by-One
 
@@ -253,11 +255,11 @@ The controller incorrectly updates the crossing state when a train leaves, keepi
 +  . CONTROLLER(tail(queue), busy, gate)
 ```
 
-The road availability property (6) fails with the following counterexample:
+The road availability property (#pr("6")) fails with the following counterexample:
 
 $"approach"(t_1) seq "lower" seq "down" seq "grant"(t_1) seq "enter"(t_1) seq "exit"(t_1) seq "leave"(t_1)$
 
-Although $t_1$ has left the crossing and the queue is empty, the controller still considers the crossing busy. Both `grant` and `raise` require $c = "free"$, so neither can ever happen again, and the gate stays closed. A train $t_2$ that approaches afterwards is queued but never granted access, since the head of the queue waits for a `leave` that its train can never produce. Once every train is stuck in the queue, no train can approach any more and the system deadlocks. Hence properties 4 (deadlock freedom), 5a (liveness), 6 (road availability), 7 (infinite opening) and 8 (non-vacuity, since `raise` is unreachable) fail. Properties 1 to 3 and 5b still hold, because neither `up` nor a second `enter` ever occurs.
+Although $t_1$ has left the crossing and the queue is empty, the controller still considers the crossing busy. Both `grant` and `raise` require $c = "free"$, so neither can ever happen again, and the gate stays closed. A train $t_2$ that approaches afterwards is queued but never granted access, since the head of the queue waits for a `leave` that its train can never produce. Once every train is stuck in the queue, no train can approach any more and the system deadlocks. Hence properties #pr("4") (deadlock freedom), #pr("5a") (liveness), #pr("6") (road availability), #pr("7") (infinite opening) and #pr("8") (non-vacuity, since `raise` is unreachable) fail. Properties #pr("1") to #pr("3") and #pr("5b") still hold, because neither `up` nor a second `enter` ever occurs.
 
 == State Space and Abstraction
 
@@ -269,7 +271,7 @@ Although $t_1$ has left the crossing and the queue is empty, the controller stil
   [#figure(image("./assets/branching_bisimulation_2.png"), caption: [Reduced LTS]) <fig:reduced-lts-2>],
 )
 
-For $N = 1$ to $6$ the full LTS has 10, 31, 108, 451, 2278 and 13695 states, respectively. The reduced LTS has 8, 23, 78, 323, 1628 and 9783. Both LTSs grow quickly with $N$, because the trains interleave freely and the controller keeps a queue of waiting trains.
+For $N = 1$ to $6$ the full LTS (@fig:full-lts-2) has 10, 31, 108, 451, 2278 and 13695 states, respectively. The reduced LTS (@fig:reduced-lts-2) has 8, 23, 78, 323, 1628 and 9783. Both LTSs grow quickly with $N$, because the trains interleave freely and the controller keeps a queue of waiting trains.
 
 The reduction comes from hiding the `lower` and `down` handshakes between the controller and the gate. These actions only move the gate from open to closed and are not visible to the trains. After hiding they become $tau$ steps, and the reduction merges the states that were connected only by these steps. This removes ≈26.5% of the states, and the gain stays similar as $N$ grows, since the reduced LTS is ≈73.5% of the full one for every $N$.
 
