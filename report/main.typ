@@ -1,5 +1,5 @@
 #import "@preview/codly:2.0.0" as codly
-// Absolute size: codly 2.0 applies the 0.8em raw shrink inconsistently (diffs end up smaller).
+
 #show raw: set text(size: 8.8pt)
 #show raw.where(block: true): codly.new
 
@@ -8,7 +8,6 @@
 ]
 #let seq = math.class("binary", ".")
 #let dia(x) = $lr(chevron.l #x chevron.r)$
-// Clickable reference to a Task 2 property row.
 #let pr(id, body: none) = link(label("prop-" + id), if body == none { id } else { body })
 
 #set page(numbering: "1")
@@ -29,7 +28,6 @@
   leading: 0.52em,
 )
 
-// Display equations: left-aligned with a small indent instead of centred.
 #show math.equation.where(block: true): it => pad(left: 1em, align(left, it))
 
 = Introduction
@@ -83,7 +81,6 @@ Physical events, on the other hand, are what someone standing near the crossing 
   [#figure(image("./assets/branching_bisimulation.png"), caption: [Reduced LTS]) <fig:reduced-lts>],
 )
 
-// TODO: confirm the state counts with the tool.
 The full LTS (@fig:full-lts) is a single cycle of 9 states, two of whose transitions are $tau$ (the hidden messages). None of these $tau$-steps removes a choice, so branching bisimulation collapses them, leaving a cycle of 7 states made only of the physical events (@fig:reduced-lts). This is the externally observable behaviour of the train passing through the crossing.
 
 == Properties
@@ -141,7 +138,6 @@ In this task the model allows multiple trains to pass through the crossing one a
 
 $"Train"(t)$ and $"Gate"$ are the same as in Task 1, with the train's actions carrying its identity. The controller keeps a queue $Q$ of the trains that approached and did not leave yet, whether the crossing $c$ is `busy` or `free`, and the gate state $g$:
 
-// Slightly smaller so the longest line fits the page width.
 #[
   #set text(size: 0.94em)
   $
@@ -163,7 +159,6 @@ where $Q triangle.l.small t$ appends $t$ to the end of $Q$. We chose a queue ove
 
 All properties are quantified over $t in "Id"$, and some with $t in "Id"$ s.t. $t != t'$ as well.
 
-// TODO: confirm all results on the current model (queue + leave-only controller).
 #table(
   columns: (auto, 1fr, auto),
   [*Property*], [*Formula*], [*Result*],
