@@ -1,1 +1,2 @@
-forall t: Id . [true*]<true* . approach(t)>true 
+% Every reachable state has an outgoing transition, including an internal one.
+[true*]<true>true

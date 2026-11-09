@@ -1,2 +1,3 @@
-% The gate is guarenteed to open infinitely often.
-[((!up)* . up)*] true && <true> true
+% From every reachable state, every maximal execution must eventually perform up.
+% This excludes both deadlock and an infinite suffix without up.
+[true*] mu X . (<true>true && [!up]X)

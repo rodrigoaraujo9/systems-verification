@@ -1,1 +1,2 @@
-[true*]<true*><approach>true
+% Every reachable state has an outgoing transition.
+[true*]<true>true

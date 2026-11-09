@@ -1,2 +1,6 @@
-([true* . enter . (!exit)* . up . true* . exit] false)
-	&& ([true* . up . (!down)* . enter] false)
+% The gate cannot reach up while the train is on the crossing.
+[true* . enter . (!exit)* . up] false
+% The initially open gate must reach down before the first entry.
+&& [(!down)* . enter] false
+% After every up, another down is required before entry.
+&& [true* . up . (!down)* . enter] false

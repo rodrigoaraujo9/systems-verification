@@ -1,7 +1,5 @@
-% As i understood:
-% - a train can (always/eventually) get on the crossing
-% - gate raising is (always/eventually) reachable
-% I think here it should be eventually, so as to give meaning to the properties.
+% From every reachable state, each train can reach enter, raise is reachable,
+% and at least one transition is enabled. These are not initial-state-only checks.
 forall t: Id . [true*] <true*.enter(t)> true &&
 [true*] <true*.raise> true &&
 [true*] <true>true

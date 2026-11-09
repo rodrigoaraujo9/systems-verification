@@ -1,1 +1,2 @@
-[true* . leave]<true* . raise> true
+% Use the visible physical events: leave and raise are hidden in the model.
+[true* . exit]<true* . up> true

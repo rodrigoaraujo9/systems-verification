@@ -1,0 +1,65 @@
+sort
+    Id = struct t1 | t2 | t3;
+    Gate = struct open | opening | closed | closing;
+    Crossing = struct busy | free;
+
+act
+    % Train Actions
+    approach_train, grant_train, leave_train : Id;
+    enter, exit : Id;
+
+    % Controller Actions
+    lower_controller, down_controller, raise_controller, up_controller;
+    approach_controller, grant_controller, leave_controller : Id;
+
+    % Gate Actions
+    lower_gate, down_gate, raise_gate, up_gate;
+
+    % Communication Actions
+    approach, grant, leave : Id;
+    lower, down, raise, up;
+
+proc
+    TRAIN(t: Id) = approach_train(t)
+                 . grant_train(t)
+                 . enter(t)
+                 . exit(t)
+                 . leave_train(t)
+                 . TRAIN(t);
+
+    GATE = lower_gate . down_gate . raise_gate . up_gate . GATE;
+
+    CONTROLLER(queue: List(Id), crossing: Crossing, gate: Gate) =
+
+        (sum t: Id . !(t in queue) ->
+            approach_controller(t) . CONTROLLER(queue <| t, crossing, gate)) +
+
+        ((queue != [] && gate == closed && crossing == free) ->
+            grant_controller(head(queue)) . CONTROLLER(queue, busy, gate)) +
+
+        ((queue != [] && crossing == busy) ->
+            leave_controller(head(queue)) . CONTROLLER(tail(queue), busy, gate)) +
+
+        ((gate == open && queue != []) ->
+            lower_controller . CONTROLLER(queue, crossing, closing)) +
+
+        ((gate == closing) ->
+            down_controller . CONTROLLER(queue, crossing, closed)) +
+
+        ((gate == closed && queue == [] && crossing == free) ->
+            raise_controller . CONTROLLER(queue, crossing, opening)) +
+
+        ((gate == opening) ->
+            up_controller . CONTROLLER(queue, crossing, open));
+
+init
+    hide({lower, down}, 
+		allow({ approach, lower, down, grant, leave, raise, up, enter, exit },
+        comm( { approach_controller | approach_train -> approach
+              , lower_controller    | lower_gate     -> lower
+              , down_controller     | down_gate      -> down
+              , grant_controller    | grant_train    -> grant
+              , leave_controller    | leave_train    -> leave
+              , raise_controller    | raise_gate     -> raise
+              , up_controller       | up_gate        -> up }
+            , TRAIN(t1) || TRAIN(t2) || TRAIN(t3) || GATE || CONTROLLER([], free, open))));

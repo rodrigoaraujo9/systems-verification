@@ -1,7 +1,7 @@
-% For every t: TrainId, every approach(t) is eventually followed by enter(t).
-%
-% - enter is always reachable after approach for a given train.
-% - no train enters twice while another train waits.
+% 5a: enter(t) remains reachable throughout the wait after approach(t).
+% 5b: no other train enters twice during that wait.
+% Eventual entry on every infinite execution additionally follows from the
+% finite FIFO queue and the absence of an infinite cycle that avoids its head.
 forall t, t': Id .
   ([true* . approach(t) . (!enter(t))*] <true* . enter(t)> true) &&
   (val(t != t') =>
