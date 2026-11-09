@@ -81,7 +81,7 @@ Physical events, on the other hand, are what someone standing near the crossing 
 )
 
 // TODO: confirm the state counts with the tool.
-The full LTS (@fig:full-lts) is a single cycle of 9 states, four of whose transitions are $tau$ (the hidden messages). None of these $tau$-steps removes a choice, so branching bisimulation collapses them, leaving a cycle of 5 states made only of the physical events (@fig:reduced-lts). This is the externally observable behaviour of the train passing through the crossing.
+The full LTS (@fig:full-lts) is a single cycle of 9 states, two of whose transitions are $tau$ (the hidden messages). None of these $tau$-steps removes a choice, so branching bisimulation collapses them, leaving a cycle of 7 states made only of the physical events (@fig:reduced-lts). This is the externally observable behaviour of the train passing through the crossing.
 
 == Properties
 
