@@ -157,7 +157,7 @@ where $Q triangle.l.small t$ appends $t$ to the end of $Q$. We chose a queue ove
 
 == Properties
 
-All properties are quantified over $t in "Id"$, and some with $t in "Id"$ s.t. $t != t'$ as well.
+All properties are quantified over $t in "Id"$, and some with $t' in "Id"$ s.t. $t != t'$ as well.
 
 #table(
   columns: (auto, 1fr, auto),
