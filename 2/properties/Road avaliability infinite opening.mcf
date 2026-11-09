@@ -1,1 +1,13 @@
-[((!up)* . up)*] true && <true> true
+% The gate is guaranteed to open infinitely often.
+%
+% - this is not true for the model the guidelines request.
+% - since the gate should remain open until there are no trains waiting,
+% if trains keep comming and queue never empties, the gate remains open,
+% therefore does not open infinitely often.
+%
+% We present a counterexample:
+% t1 and t2 keep re-approaching, so the queue never empties.
+[ approach(t1) . approach(t2)            % t1 and t2 are both waiting
+  . (!up)* . leave(t1) . approach(t1)    % t1 crosses and queues again
+  . (!up)* . leave(t2) . approach(t2)    % t2 crosses and queues again
+] false
