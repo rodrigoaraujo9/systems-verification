@@ -15,7 +15,7 @@
   ]
 
   Diogo and Rodrigo Gomes de Araújo \
-  up202510267, up202210267
+  up202510267, up202205515
 
   #text(size: 10pt)[#datetime.today().display("[month repr:long] [year]")]
 ]
